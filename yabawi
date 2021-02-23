@@ -1,0 +1,272 @@
+package sosoeueun;
+
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Random;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
+
+public class NeGame extends JFrame implements ActionListener{
+
+	static int ZERO = 0;
+	static int ONE = 0;
+	static int TWO = 0;
+	static int THREE = 0;
+	static int FOUR = 0;
+	static int InPutNum = 0;
+
+	static int heart = 3, count = 0;
+	
+	//배열 생성
+	static int [][] cup = new int[3][5]; // 윗줄이x좌표, 밑줄이 공여부, 젤 밑은 고정 위치
+	
+	static String status;
+
+	private JPanel panel;
+	private JTextField output;
+	private JTextField information;
+
+	private JButton zero;
+	private JButton one;
+	private JButton two;
+	private JButton three;
+	private JButton four;
+
+	public NeGame() {
+		setTitle("야바위");
+		setSize(600,400);
+		setResizable(false);
+		setLocationRelativeTo(null);
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+		final int BALL = 1;
+		int ballL = 0;
+		int ballcount = 0;
+		int shakeNum = 0;
+		int x = 0;
+		
+
+		for(int i = 0 ; i < 5 ; i++) {
+			x += 1;
+			cup[0][i] = x;
+			cup[2][i] = x;
+		}
+
+		Random rand = new Random();
+
+		//공의 개수 랜덤 지정
+		while(true) {
+			ballcount = rand.nextInt(3);
+			//확인용
+			System.out.println("랜덤 공의 개수 : " + ballcount);
+
+			if(ballcount != 0 ) {
+				break;
+			}
+		}
+
+		count = ballcount;
+
+		for(int i = 0 ; i < ballcount ; ) { // 배열에 공의 위치 저장
+			// 공의 위치
+			ballL = rand.nextInt(5);
+			//확인용
+			System.out.println(ballL + "위치");
+
+			if(cup[1][ballL] == 0) {
+				cup[1][ballL] = BALL;
+				i++;
+			}   
+		}
+		// 4~12번 랜덤으로 컵 섞을 횟수 정하기
+		int level = 4;
+		while(shakeNum < level) {
+			shakeNum = rand.nextInt(level*3); // LEVEL 값 범위 지정해서 난이도 나누기도 가능할 듯
+		}
+
+		System.out.println("반복횟수"+shakeNum);
+
+		int shake1_1 = 0 , shake2_2 = 0; //중복제거용
+
+		//컵 섞기 반복
+		for(int i = 0 ; i < shakeNum ; i++) {
+			int shake1, shake2;
+			int empty = 0;
+			shake1 = rand.nextInt(5);
+
+			while(true) {
+				int r = 0;
+				r = rand.nextInt(5);
+				if(shake1 != r) {
+					shake2 = r;
+					break;
+				}
+			}
+
+			if(shake1_1 == shake1 && shake2 == shake2_2) {
+				i--;
+				continue;
+			}
+
+			//컵의 위치 바꾸기(배열의 1번째 줄)
+			empty = cup[0][shake1];
+			cup[0][shake1] = cup[0][shake2];
+			cup[0][shake2] = empty;
+
+			// 공의 위치 바꾸기 (배열의 2번째 줄)
+			empty = cup[1][shake1];
+			cup[1][shake1] = cup[1][shake2];
+			cup[1][shake2] = empty;
+
+			// 중복 제거용 값
+			shake1_1 = shake1;
+			shake2_2 = shake2;
+
+			// 확인용 출력
+			for(int z = 0 ; z < 3 ; z++) {
+				for(int j = 0 ; j < 5 ; j++) {
+					System.out.print(cup[z][j] + " ");
+				}
+				System.out.println();
+			}
+
+			System.out.println("-----------"+i+"-----------");
+
+		}
+
+		status = "목숨 : " + heart +", 남은 공 :" + count;
+
+		panel = new JPanel();
+		panel.setLayout(new GridLayout(0,5));
+		
+		
+		
+		
+		JPanel lastPage = new JPanel();
+		lastPage.setSize(600,400);
+		lastPage.setVisible(false);
+		
+		
+		
+		information = new JTextField(status);
+		output = new JTextField(20);
+
+		zero = new JButton("ZERO");
+		one = new JButton("ONE");
+		two = new JButton("TWO");
+		three = new JButton("THREE");
+		four = new JButton("FOUR");
+
+		zero.addActionListener(this);
+		one.addActionListener(this);
+		two.addActionListener(this);
+		three.addActionListener(this);
+		four.addActionListener(this);
+
+		panel.add(zero);
+		panel.add(one);
+		panel.add(two);
+		panel.add(three);
+		panel.add(four);
+
+		add(information, BorderLayout.NORTH);
+		add(panel, BorderLayout.CENTER);
+		add(output, BorderLayout.SOUTH);
+		setVisible(true);
+
+	}
+
+	public static void main(String[] args) {
+		NeGame gui = new NeGame();
+
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+		if(heart < 1 ) {
+			output.setText("LOSE");
+			return;
+		}else if(count < 1 ) {
+			output.setText("WIN");
+			return;
+		}
+		
+		if(e.getSource() == zero) {
+			if(cup[1][0] == 1) {
+				count--;
+				information.setText("목숨 : " + heart +", 남은 공 :" + count);
+				cup[1][0] = 3 ; //다시 선택 불가능 하도록
+				zero.setText("O");
+			}else if(cup[1][0] == 0) {
+				heart--;
+				information.setText("목숨 : " + heart +", 남은 공 :" + count);
+				cup[1][0] = 3 ; //다시 선택 불가능 하도록
+				zero.setText("X");
+			}
+		}
+		
+		if(e.getSource() == one) {
+			if(cup[1][1] == 1) {
+				count--;
+				information.setText("목숨 : " + heart +", 남은 공 :" + count);
+				cup[1][1] = 3 ; 
+				one.setText("O");
+			}else if(cup[1][1] == 0) {
+				heart--;
+				information.setText("목숨 : " + heart +", 남은 공 :" + count);
+				cup[1][1] = 3 ;
+				one.setText("X");
+			}
+		}
+		
+		if(e.getSource() == two) {
+			if(cup[1][2] == 1) {
+				count--;
+				information.setText("목숨 : " + heart +", 남은 공 :" + count);
+				cup[1][2] = 3 ; 
+				two.setText("O");
+			}else if(cup[1][2] == 0) {
+				heart--;
+				information.setText("목숨 : " + heart +", 남은 공 :" + count);
+				cup[1][2] = 3 ;
+				two.setText("X");
+			}
+		}
+		
+		if(e.getSource() == three) {
+			if(cup[1][3] == 1) {
+				count--;
+				information.setText("목숨 : " + heart +", 남은 공 :" + count);
+				cup[1][3] = 3 ; 
+				three.setText("O");
+			}else if(cup[1][3] == 0) {
+				heart--;
+				information.setText("목숨 : " + heart +", 남은 공 :" + count);
+				cup[1][3] = 3 ;
+				three.setText("X");
+			}
+		}
+		
+		if(e.getSource() == four) {
+			if(cup[1][4] == 1) {
+				count--;
+				information.setText("목숨 : " + heart +", 남은 공 :" + count);
+				cup[1][4] = 3 ; 
+				four.setText("O");
+			}else if(cup[1][4] == 0) {
+				heart--;
+				information.setText("목숨 : " + heart +", 남은 공 :" + count);
+				cup[1][4] = 3 ;
+				four.setText("X");
+			}
+		}
+		
+	}
+}
